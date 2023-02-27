@@ -1,0 +1,31 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "${workspaceFolder}/run.py",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "Well",
+                "/home/liuhaozhe/voice_cloning_project/collected_audios/recorded_audios/liuhaozhe/liuhaozhe_text1.m4a" 
+            ]
+        },
+        {
+            "name": "${workspaceFolder}/run_train.py",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "yaml=config/test/ar.yml"
+            ]
+        }
+    ]
+}
