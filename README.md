@@ -4,15 +4,8 @@
 
 # VALL-E
 
-An unofficial PyTorch implementation of [VALL-E](https://valle-demo.github.io/), based on the [EnCodec](https://github.com/facebookresearch/encodec) tokenizer.
+An unofficial PyTorch implementation of [VALL-E](https://valle-demo.github.io/) by [enhuiz](https://github.com/enhuiz/vall-e), based on the [EnCodec](https://github.com/facebookresearch/encodec) tokenizer.
 
-[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/enhuiz)
-
-## Get Started
-
-> A toy Google Colab example: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1wEze0kQ0gt9B3bQmmbtbSXCoCTpq5vg-?usp=sharing).
-> Please note that this example overfits a single utterance under the `data/test` and is not usable.
-> The pretrained model is yet to come. 
 
 ### Requirements
 
@@ -21,16 +14,10 @@ Since the trainer is based on [DeepSpeed](https://github.com/microsoft/DeepSpeed
 ### Install
 
 ```
-pip install git+https://github.com/enhuiz/vall-e
+git clone --recurse-submodules https://github.com/liuhaozhe6788/vall-e.git
 ```
 
-Or you may clone by:
-
-```
-git clone --recurse-submodules https://github.com/enhuiz/vall-e.git
-```
-
-Note that the code is only tested under `Python 3.9.0`.
+Note that the code is only tested under `Python 3.9.0` `CUDA11.1`.
 
 ### Train
 
@@ -84,6 +71,7 @@ python -m vall_e <text> <ref_path> <out_path> --ar-ckpt zoo/ar.pt --nar-ckpt zoo
 - [x] Sample-wise quantization level sampling for NAR training.
 - [ ] Pre-trained checkpoint and demos on LibriTTS
 - [x] Synthesis CLI
+- [ ] Plot train and validation loss
 
 ## Notice
 
