@@ -5,6 +5,28 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "${workspaceFolder}/run_g2p.py",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "data/test"
+            ]
+        },
+        {
+            "name": "${workspaceFolder}/run_qnt.py",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "data/test",
+            ]
+        },
+        {
             "name": "${workspaceFolder}/run.py",
             "type": "python",
             "request": "launch",
@@ -13,7 +35,7 @@
             "justMyCode": true,
             "args": [
                 "Well",
-                "/home/liuhaozhe/voice_cloning_project/collected_audios/recorded_audios/liuhaozhe/liuhaozhe_text1.m4a" 
+                "/home/liuhaozhe/voice_cloning_project/collected_audios/recorded_audios/liuhaozhe/liuhaozhe_text1.m4a"
             ]
         },
         {

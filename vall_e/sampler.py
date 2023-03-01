@@ -14,7 +14,8 @@ import random
 class Sampler:
     def __init__(self, l, key_fns):
         self.tree = self._build(l, key_fns)
-
+    
+    # build a tree structure
     def _build(self, l, key_fns) -> dict[dict, list]:
         if not key_fns:
             return l
@@ -36,6 +37,7 @@ class Sampler:
 
         return tree
 
+    # first sample a speaker then sample an audio
     def _sample(self, tree):
         if isinstance(tree, list):
             ret = random.choice(tree)
@@ -46,3 +48,4 @@ class Sampler:
 
     def sample(self):
         return self._sample(self.tree)
+    

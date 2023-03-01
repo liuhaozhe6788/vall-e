@@ -38,7 +38,7 @@ class Config(ConfigBase):
     save_ckpt_every: int = 2_000
 
     model: str = "ar-quarter"
-    spkr_name_getter: str = "lambda p: p.parts[-2]"
+    spkr_name_getter: str = "lambda p: p.parts[-3]"  # NOTE: -2 for original version
 
     min_phones: int = 10
     max_phones: int = 200
@@ -93,7 +93,7 @@ class Config(ConfigBase):
         return lambda: lambda x: x
 
 
-cfg = Config.from_cli()
+cfg = Config.from_cli()  # get config
 
 if __name__ == "__main__":
     print(cfg)

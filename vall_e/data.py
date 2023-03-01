@@ -45,6 +45,7 @@ def _get_phones(path):
     return ["<s>"] + content.split() + ["</s>"]
 
 
+# reorder the data to [spk1, spk2, ..., spkn, spk1, spk2, ...]
 def _interleaved_reorder(l, fn):
     groups = defaultdict(list)
     for e in l:
@@ -165,7 +166,7 @@ class VALLEDatset(Dataset):
         text = torch.tensor([*map(self.phone_symmap.get, _get_phones(path))])
         proms = self.sample_prompts(spkr_name, ignore=path)
         resps = _load_quants(path)
-        resp = resps[..., 0]
+        resp = resps[..., 0]  # same as [:, 0] the first level of discrete code
 
         return dict(
             path=path,
@@ -175,6 +176,7 @@ class VALLEDatset(Dataset):
             resps=resps,
             resp=resp,
         )
+        # audio path, speaker name, phoneme text, audio prompts, target discrete code, 1st level of target discrete code
 
     def head_(self, n):
         self._head = n
@@ -268,7 +270,7 @@ def create_train_val_dataloader():
     train_dl = _create_dataloader(train_dataset, training=True)
     val_dl = _create_dataloader(val_dataset, training=False)
 
-    _logger.info(str(train_dataset.phone_symmap))
+    _logger.info(str(train_dataset.phone_symmap)) 
     _logger.info(str(train_dataset.spkr_symmap))
 
     _logger.info(f"#samples (train): {len(train_dataset)}.")

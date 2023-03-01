@@ -73,7 +73,7 @@ def encode_from_file(path, device="cuda"):
     wav, sr = librosa.load(str(path))
     wav = np.reshape(wav, (1, len(wav)))
     wav = torch.from_numpy(wav)
-    if wav.shape[0] == 2:
+    if wav.shape[0] == 2:  # single channel
         wav = wav[:1]
     return encode(wav, sr, device)
 

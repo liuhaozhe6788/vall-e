@@ -121,8 +121,14 @@ def train(
     train_feeder: TrainFeeder,
     eval_fn: EvalFn,
     logger: Logger = logger,
-):
-    engines = engines_loader()
+    use_tb: bool = False
+):  
+    if use_tb:
+        logger("Use Tensorboard")
+        from torch.utils.tensorboard import SummaryWriter
+        tb_writer = SummaryWriter(log_dir='tensorboard')
+
+    engines = engines_loader()  # load ckpts
     cfg = engines.cfg
 
     if is_local_leader():
@@ -147,14 +153,17 @@ def train(
         return
 
     # Training loop
-    for batch in _make_infinite_epochs(train_dl):
+    for batch_i, batch in enumerate(_make_infinite_epochs(train_dl)):  
         if engines.global_step >= cfg.max_iter:
             break
 
-        batch = to_device(batch, torch.cuda.current_device())
-        stats = engines.step(feeder=train_feeder, batch=batch)
+        batch = to_device(batch, torch.cuda.current_device())  
+        # a batch consists of paths, speakers, texts, audio prompts, 8 levels of target discrete code and 1st level of target discrete code
+        stats = engines.step(feeder=train_feeder, batch=batch)  # TODO: figure out one step
         elapsed_time = stats.get("elapsed_time", 0)
         logger(data=stats)
+        if use_tb:
+            tb_writer.add_scalars('loss', {'train': stats["model.loss"]}, batch_i)
 
         command = _non_blocking_input()
 
@@ -202,7 +211,7 @@ def train(
 
             if engines.global_step % cfg.eval_every == 0 or command in ["eval"]:
                 engines.eval()
-                eval_fn(engines=engines)
+                eval_fn(engines=engines)  
                 engines.train()
 
             if command in ["quit"]:

@@ -39,7 +39,7 @@ def main():
             _ = model(
                 text_list=batch["text"],
                 proms_list=batch["proms"],
-                resp_list=batch["resp"],
+                resp_list=batch["resp"],  
             )
         elif cfg.model.startswith("nar"):
             _ = model(
@@ -121,6 +121,7 @@ def main():
         train_dl=train_dl,
         train_feeder=train_feeder,
         eval_fn=eval_fn,
+        use_tb=True
     )
 
 

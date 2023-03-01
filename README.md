@@ -30,7 +30,7 @@ Or you may clone by:
 git clone --recurse-submodules https://github.com/enhuiz/vall-e.git
 ```
 
-Note that the code is only tested under `Python 3.10.7`.
+Note that the code is only tested under `Python 3.9.0`.
 
 ### Train
 
