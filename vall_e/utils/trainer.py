@@ -123,13 +123,17 @@ def train(
     logger: Logger = logger,
     use_tb: bool = False
 ):  
-    if use_tb:
-        logger("Use Tensorboard")
-        from torch.utils.tensorboard import SummaryWriter
-        tb_writer = SummaryWriter(log_dir='tensorboard')
-
     engines = engines_loader()  # load ckpts
     cfg = engines.cfg
+
+    if use_tb:
+        logger("Use Tensorboard")
+        import tensorflow as tf
+        import datetime
+        # Hide GPU from visible devices
+        tf.config.set_visible_devices([], 'GPU')
+        log_dir = f"logs/{cfg.model}/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+        train_summary_writer = tf.summary.create_file_writer(log_dir)
 
     if is_local_leader():
         cfg.dump()
@@ -163,7 +167,8 @@ def train(
         elapsed_time = stats.get("elapsed_time", 0)
         logger(data=stats)
         if use_tb:
-            tb_writer.add_scalars('loss', {'train': stats["model.loss"]}, batch_i)
+            with train_summary_writer.as_default():
+                tf.summary.scalar('train_loss', stats["model.loss"], step=batch_i)
 
         command = _non_blocking_input()
 
@@ -211,7 +216,9 @@ def train(
 
             if engines.global_step % cfg.eval_every == 0 or command in ["eval"]:
                 engines.eval()
-                eval_fn(engines=engines)  
+                eval_stats = eval_fn(engines=engines) 
+                with train_summary_writer.as_default():
+                    tf.summary.scalar('val_loss', eval_stats["loss.nll"], step=batch_i)
                 engines.train()
 
             if command in ["quit"]:

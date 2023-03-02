@@ -276,14 +276,15 @@ def create_train_val_dataloader():
     _logger.info(f"#samples (train): {len(train_dataset)}.")
     _logger.info(f"#samples (val): {len(val_dataset)}.")
 
-    subtrain_dataset = copy.deepcopy(train_dataset)
-    subtrain_dataset.interleaved_reorder_(cfg.get_spkr)
-    subtrain_dataset.head_(cfg.max_num_val)
-    subtrain_dataset.training_(False)
-    subtrain_dl = _create_dataloader(subtrain_dataset, training=False)
-    assert isinstance(subtrain_dl.dataset, VALLEDatset)
+    # subtrain_dataset = copy.deepcopy(train_dataset)
+    # subtrain_dataset.interleaved_reorder_(cfg.get_spkr)
+    # subtrain_dataset.head_(cfg.max_num_val)
+    # subtrain_dataset.training_(False)
+    # subtrain_dl = _create_dataloader(subtrain_dataset, training=False)
+    # assert isinstance(subtrain_dl.dataset, VALLEDatset)
 
-    return train_dl, subtrain_dl, val_dl
+    # return train_dl, subtrain_dl, val_dl
+    return train_dl, val_dl
 
 
 if __name__ == "__main__":

@@ -10,7 +10,7 @@ class NAR(Base):
         return 7
 
     @property
-    def casual(self):
+    def causal(self):
         return False
 
     @property
@@ -101,7 +101,7 @@ class NAR(Base):
         return prev_list
 
 
-def example_usage():
+def test_nar():
     from functools import partial
     from pathlib import Path
 
@@ -183,4 +183,4 @@ def example_usage():
 
 
 if __name__ == "__main__":
-    example_usage()
+    test_nar()

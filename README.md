@@ -61,6 +61,12 @@ This will export the latest checkpoint.
 python -m vall_e <text> <ref_path> <out_path> --ar-ckpt zoo/ar.pt --nar-ckpt zoo/nar.pt
 ```
 
+### Open tensorboard
+
+```
+tensorboard --logdir logs/ar --host localhost --port 8088
+```
+
 ## TODO
 
 - [x] AR model for the first quantizer

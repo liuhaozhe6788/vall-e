@@ -30,19 +30,19 @@ def load_engines():
 def main():
     setup_logging(cfg.log_dir)
 
-    train_dl, subtrain_dl, val_dl = create_train_val_dataloader()
+    train_dl, val_dl = create_train_val_dataloader()
 
     def train_feeder(engines, batch, name):
         model = engines["model"]
 
         if cfg.model.startswith("ar"):
-            _ = model(
+            _ = model.forward(
                 text_list=batch["text"],
                 proms_list=batch["proms"],
                 resp_list=batch["resp"],  
             )
         elif cfg.model.startswith("nar"):
-            _ = model(
+            _ = model.forward(
                 text_list=batch["text"],
                 proms_list=batch["proms"],
                 resps_list=batch["resps"],
@@ -62,8 +62,6 @@ def main():
 
     @torch.inference_mode()
     def run_eval(engines, name, dl):
-        log_dir = cfg.log_dir / str(engines.global_step) / name
-
         model = engines["model"]
         log_dir = cfg.log_dir / str(engines.global_step) / name
         stats = defaultdict(list)
@@ -71,15 +69,16 @@ def main():
             batch: dict = to_device(batch, cfg.device)
 
             if cfg.model.startswith("ar"):
-                resp_list = model(
+                resp_list = model.forward(
                     text_list=batch["text"],
                     proms_list=batch["proms"],
+                    resp_list=batch["resp"], 
                     max_steps=cfg.max_val_ar_steps,
                     sampling_temperature=cfg.sampling_temperature,
                 )
                 resps_list = [r.unsqueeze(-1) for r in resp_list]
             elif cfg.model.startswith("nar"):
-                resps_list = model(
+                resps_list = model.forward(
                     text_list=batch["text"],
                     proms_list=batch["proms"],
                     resps_list=[r.unsqueeze(-1) for r in batch["resp"]],
@@ -92,7 +91,29 @@ def main():
             batch_stats = {k: v.item() for k, v in losses.items()}
             for k, v in batch_stats.items():
                 stats[k].append(v)
-
+            
+        ### generate audio output of validation set
+        def generate():
+            batch = next(iter(dl))   
+            batch: dict = to_device(batch, cfg.device)
+            if cfg.model.startswith("ar"):
+                resp_list = model.forward(
+                    text_list=batch["text"],
+                    proms_list=batch["proms"],
+                    max_steps=cfg.max_val_ar_steps,
+                    sampling_temperature=cfg.sampling_temperature,
+                )
+                resps_list = [r.unsqueeze(-1) for r in resp_list]
+            elif cfg.model.startswith("nar"):
+                resps_list = model.forward(
+                    text_list=batch["text"],
+                    proms_list=batch["proms"],
+                    resps_list=[r.unsqueeze(-1) for r in batch["resp"]],
+                    sampling_temperature=cfg.sampling_temperature,
+                )
+            else:
+                raise NotImplementedError(cfg.model)
+            
             for path, ref, hyp in zip(batch["path"], batch["resps"], resps_list):
                 relpath = path.relative_to(cfg.data_root)
                 hyp_path = (log_dir / "hyp" / relpath).with_suffix(".wav")
@@ -102,6 +123,7 @@ def main():
                 qnt.decode_to_file(ref, ref_path)
                 if len(hyp) > 0:
                     qnt.decode_to_file(hyp, hyp_path)
+        generate()
 
         qnt.unload_model()
 
@@ -111,10 +133,11 @@ def main():
         _logger.info(f"Eval: {stats}.")
 
         _logger.info(f"{json.dumps(stats)}.")
+        return stats
 
     def eval_fn(engines):
-        run_eval(engines, "subtrain", subtrain_dl)
-        run_eval(engines, "val", val_dl)
+        # run_eval(engines, "subtrain", subtrain_dl)
+        return run_eval(engines, "val", val_dl)
 
     trainer.train(
         engines_loader=load_engines,

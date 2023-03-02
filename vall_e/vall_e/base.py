@@ -90,11 +90,11 @@ class SinusodialEmbedding(nn.Module):
 
 
 class Attention(nn.Module):
-    def __init__(self, d_model, n_heads, casual):
+    def __init__(self, d_model, n_heads, causal):
         super().__init__()
         assert d_model % n_heads == 0
         dim_head = d_model // n_heads
-        self.casual = casual
+        self.causal = causal
         self.n_heads = n_heads
         self.scale = dim_head**-0.5
         self.to_qkv = nn.Linear(d_model, d_model * 3, bias=False)
@@ -118,7 +118,7 @@ class Attention(nn.Module):
 
         kpm = m.unsqueeze(1) * m.unsqueeze(2)  # b i j 1
 
-        if self.casual:
+        if self.causal:
             kpm = kpm.squeeze(-1).tril().unsqueeze(-1)  # b i j 1
 
         e = e.masked_fill(kpm == 0, -torch.finfo(e.dtype).max)
@@ -195,10 +195,10 @@ class PrenormResidual(nn.Module):
 
 
 class Block(nn.Sequential):
-    def __init__(self, d_model, n_heads, p_dropout, casual, norm_type, n_levels):
+    def __init__(self, d_model, n_heads, p_dropout, causal, norm_type, n_levels):
         super().__init__()
         self.attn = PrenormResidual(
-            Attention(d_model, n_heads, casual),
+            Attention(d_model, n_heads, causal),
             d_model=d_model,
             p_dropout=p_dropout,
             requires_mask=True,
@@ -287,7 +287,7 @@ def _join(x: tuple[Tensor], sep: Tensor):
 
 class Base(nn.Module):
     @property
-    def casual(self) -> bool:
+    def causal(self) -> bool:
         raise NotImplementedError
 
     @property
@@ -321,7 +321,7 @@ class Base(nn.Module):
         super().__init__()
         self.n_tokens = n_tokens
 
-        casual = self.casual
+        causal = self.causal
 
         # +1 to include the stop token
         n_stop_tokens = 1 if self.use_stop_token else 0
@@ -342,7 +342,7 @@ class Base(nn.Module):
                 d_model=d_model,
                 n_heads=n_heads,
                 p_dropout=p_dropout,
-                casual=casual,
+                causal=causal,
                 norm_type=self.norm_type,
                 n_levels=self.n_resp_levels,
             )

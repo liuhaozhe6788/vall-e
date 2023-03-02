@@ -12,7 +12,7 @@ class AR(Base):
         return 1
 
     @property
-    def casual(self):
+    def causal(self):
         return True
 
     @property
@@ -27,6 +27,7 @@ class AR(Base):
     def resp_loss_only(self):
         return False
 
+    # prune discrete code after stop token
     def _prune(self, l: Tensor):
         indices = (l == self.stop_token).nonzero()
         if len(indices) == 0:
@@ -91,7 +92,7 @@ class AR(Base):
         return pruned
 
 
-def example_usage():
+def test_ar():
     from functools import partial
 
     import soundfile
@@ -99,7 +100,7 @@ def example_usage():
 
     device = "cuda"
 
-    qnt = torch.load("data/test/test.qnt.pt")[0, 0].to(device)
+    qnt = torch.load("data/test/367/130732/367_130732_000000_000000.qnt.pt")[0, 0].to(device)
     num_qnts = 1024
 
     model = AR(num_qnts).to(device)
@@ -150,4 +151,4 @@ def example_usage():
 
 
 if __name__ == "__main__":
-    example_usage()
+    test_ar()
