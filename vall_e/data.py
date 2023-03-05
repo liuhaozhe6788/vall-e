@@ -164,7 +164,7 @@ class VALLEDatset(Dataset):
 
         spkr_name = cfg.get_spkr(path)
         text = torch.tensor([*map(self.phone_symmap.get, _get_phones(path))])
-        proms = self.sample_prompts(spkr_name, ignore=path)
+        proms = self.sample_prompts(spkr_name, ignore=path)  # discrete code of prompts
         resps = _load_quants(path)
         resp = resps[..., 0]  # same as [:, 0] the first level of discrete code
 
@@ -176,7 +176,7 @@ class VALLEDatset(Dataset):
             resps=resps,
             resp=resp,
         )
-        # audio path, speaker name, phoneme text, audio prompts, target discrete code, 1st level of target discrete code
+        # audio path, speaker name, phoneme text, discrete code of audio prompts, discrete code of audio sample, 1st level of discrete code of audio sample
 
     def head_(self, n):
         self._head = n

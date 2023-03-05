@@ -116,10 +116,10 @@ class Attention(nn.Module):
         e = einsum("b i h d, b j h d -> b i j h", q, k)
         e = e * self.scale
 
-        kpm = m.unsqueeze(1) * m.unsqueeze(2)  # b i j 1
+        kpm = m.unsqueeze(1) * m.unsqueeze(2)  # b i j 1  element-wise multiply
 
         if self.causal:
-            kpm = kpm.squeeze(-1).tril().unsqueeze(-1)  # b i j 1
+            kpm = kpm.squeeze(-1).tril().unsqueeze(-1)  # b i j 1  masking
 
         e = e.masked_fill(kpm == 0, -torch.finfo(e.dtype).max)
         a = e.softmax(dim=2)  # Normalize on j, i.e. key
@@ -424,19 +424,19 @@ class Base(nn.Module):
             y: sampled tokens
         """
         x_list = self._samplewise_merge_tensors(
-            self.text_emb(text_list),
-            self.proms_emb(proms_list),
-            self.resps_emb(resps_list),
+            self.text_emb(text_list),  # [t d_model]  t=172
+            self.proms_emb(proms_list),  # [t' d_model]  t'=1167
+            self.resps_emb(resps_list),  # [t'' d_model]  t''=819
             sep=self.sep,
-        )
+        )  # [t+t'+t''+2 d_model]
 
-        x, m = list_to_tensor(x_list)
+        x, mask = list_to_tensor(x_list)
         x = self.sin_emb.add_pe(x)
 
         for block in self.blocks:
-            x = block(x, m, quant_levels)
+            x = block(x, mask, quant_levels)
 
-        h = self.classifier(x) * m
+        h = self.classifier(x) * mask  # [b max(t+t'+t''+2) n_resps_tokens]
 
         # Remove padding
         h_list = [hi[:li] for hi, li in zip(h, map(len, x_list))]
@@ -464,8 +464,8 @@ class Base(nn.Module):
                 if self.resp_loss_only:
                     text_prom_list[i][:] = self.ignore_index
                 else:
-                    text_prom_list[i] = text_prom_list[i].roll(-1, dims=0)
-                    text_prom_list[i][-1] = self.ignore_index
+                    text_prom_list[i] = text_prom_list[i].roll(-1, dims=0)  # cyclic shift ahead one timestep
+                    text_prom_list[i][-1] = self.ignore_index  # ignore the last step
 
             if shift_targ_list:
                 # Also make target earlier if in autoregressive mode

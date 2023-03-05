@@ -46,7 +46,7 @@ class AR(Base):
         max_steps: int = 1000,
         sampling_temperature: float = 1.0,
     ):
-        if resp_list is not None:
+        if self.training:
             return super().forward(
                 text_list,
                 proms_list,

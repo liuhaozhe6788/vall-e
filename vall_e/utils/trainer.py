@@ -132,7 +132,7 @@ def train(
         import datetime
         # Hide GPU from visible devices
         tf.config.set_visible_devices([], 'GPU')
-        log_dir = f"logs/{cfg.model}/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+        log_dir = f"{cfg.log_root}/{cfg.relpath}/tensorboard/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
         train_summary_writer = tf.summary.create_file_writer(log_dir)
 
     if is_local_leader():
