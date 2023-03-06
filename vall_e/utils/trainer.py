@@ -163,7 +163,7 @@ def train(
 
         batch = to_device(batch, torch.cuda.current_device())  
         # a batch consists of paths, speakers, texts, audio prompts, 8 levels of target discrete code and 1st level of target discrete code
-        stats = engines.step(feeder=train_feeder, batch=batch)  # TODO: figure out one step
+        stats = engines.step(feeder=train_feeder, batch=batch)  
         elapsed_time = stats.get("elapsed_time", 0)
         logger(data=stats)
         if use_tb:

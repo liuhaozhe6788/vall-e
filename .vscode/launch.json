@@ -46,7 +46,7 @@
             "console": "integratedTerminal",
             "justMyCode": true,
             "args": [
-                "yaml=config/test/ar.yml"
+                "yaml=config/test/nar.yml"
             ]
         }
     ]

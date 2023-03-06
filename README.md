@@ -14,7 +14,7 @@ Since the trainer is based on [DeepSpeed](https://github.com/microsoft/DeepSpeed
 ### Install
 
 ```
-git clone --recurse-submodules https://github.com/liuhaozhe6788/vall-e.git
+git clone https://github.com/liuhaozhe6788/vall-e.git
 ```
 
 Note that the code is only tested under `Python 3.9.0` `CUDA11.1`.
@@ -26,13 +26,13 @@ Note that the code is only tested under `Python 3.9.0` `CUDA11.1`.
 2. Quantize the data:
 
 ```
-python -m vall_e.emb.qnt data/your_data
+python run_qnt.py data/your_data
 ```
 
 3. Generate phonemes based on the text:
 
 ```
-python -m vall_e.emb.g2p data/your_data
+python run_g2p.py  data/your_data
 ```
 
 4. Customize your configuration by creating `config/your_data/ar.yml` and `config/your_data/nar.yml`. Refer to the example configs in `config/test` and `vall_e/config.py` for details. You may choose different model presets, check `vall_e/vall_e/__init__.py`.
@@ -40,7 +40,7 @@ python -m vall_e.emb.g2p data/your_data
 5. Train the AR or NAR model using the following scripts:
 
 ```
-python -m vall_e.train yaml=config/your_data/ar_or_nar.yml
+python run_train.py yaml=config/your_data/ar_or_nar.yml
 ```
 
 You may quit your training any time by just typing `quit` in your CLI. The latest checkpoint will be automatically saved.
@@ -50,7 +50,7 @@ You may quit your training any time by just typing `quit` in your CLI. The lates
 Both trained models need to be exported to a certain path. To export either of them, run:
 
 ```
-python -m vall_e.export zoo/ar_or_nar.pt yaml=config/your_data/ar_or_nar.yml
+python run_export.py zoo/ar_or_nar.pt yaml=config/your_data/ar_or_nar.yml
 ```
 
 This will export the latest checkpoint.
@@ -58,13 +58,13 @@ This will export the latest checkpoint.
 ### Synthesis
 
 ```
-python -m vall_e <text> <ref_path> <out_path> --ar-ckpt zoo/ar.pt --nar-ckpt zoo/nar.pt
+python run.py <text> <ref_path> <out_path> --ar-ckpt zoo/ar.pt --nar-ckpt zoo/nar.pt
 ```
 
 ### Open tensorboard
 
 ```
-tensorboard --logdir logs/ar --host localhost --port 8088
+tensorboard --logdir logs/your_data --host localhost --port 8088
 ```
 
 ## TODO
@@ -77,7 +77,7 @@ tensorboard --logdir logs/ar --host localhost --port 8088
 - [x] Sample-wise quantization level sampling for NAR training.
 - [ ] Pre-trained checkpoint and demos on LibriTTS
 - [x] Synthesis CLI
-- [ ] Plot train and validation loss
+- [x] Plot train and validation loss
 
 ## Notice
 

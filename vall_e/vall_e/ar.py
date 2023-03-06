@@ -42,16 +42,17 @@ class AR(Base):
         self,
         text_list: list[Tensor],
         proms_list: list[Tensor],
-        resp_list = None,
+        targ_list = None,
         max_steps: int = 1000,
         sampling_temperature: float = 1.0,
     ):
         if self.training:
+
             return super().forward(
                 text_list,
                 proms_list,
-                self._unsqueeze_list(resp_list),
-                resp_list,
+                self._unsqueeze_list(targ_list),
+                targ_list,
                 quant_levels=None,
                 shift_targ_list=True,
                 return_all_resp=False,
@@ -76,6 +77,8 @@ class AR(Base):
             torch.zeros(0, device=device).long() for _ in text_list
         ]
         stopped = torch.zeros(len(text_list), device=device).bool()
+
+        # generate autoregressively
         for _ in trange(max_steps):
             r = super().forward(
                 text_list,

@@ -39,7 +39,7 @@ def main():
             _ = model.forward(
                 text_list=batch["text"],
                 proms_list=batch["proms"],
-                resp_list=batch["resp"],  
+                targ_list=batch["resp"],  
             )
         elif cfg.model.startswith("nar"):
             _ = model.forward(
@@ -69,20 +69,16 @@ def main():
             batch: dict = to_device(batch, cfg.device)
 
             if cfg.model.startswith("ar"):
-                resp_list = model.forward(
+                _ = model.forward(
                     text_list=batch["text"],
                     proms_list=batch["proms"],
-                    resp_list=batch["resp"], 
-                    max_steps=cfg.max_val_ar_steps,
-                    sampling_temperature=cfg.sampling_temperature,
+                    targ_list=batch["resp"], 
                 )
-                resps_list = [r.unsqueeze(-1) for r in resp_list]
             elif cfg.model.startswith("nar"):
-                resps_list = model.forward(
+                _ = model.forward(
                     text_list=batch["text"],
                     proms_list=batch["proms"],
-                    resps_list=[r.unsqueeze(-1) for r in batch["resp"]],
-                    sampling_temperature=cfg.sampling_temperature,
+                    resps_list=batch["resps"],
                 )
             else:
                 raise NotImplementedError(cfg.model)

@@ -119,7 +119,7 @@ class Attention(nn.Module):
         kpm = m.unsqueeze(1) * m.unsqueeze(2)  # b i j 1  element-wise multiply
 
         if self.causal:
-            kpm = kpm.squeeze(-1).tril().unsqueeze(-1)  # b i j 1  masking
+            kpm = kpm.squeeze(-1).tril().unsqueeze(-1)  # b i j 1  
 
         e = e.masked_fill(kpm == 0, -torch.finfo(e.dtype).max)
         a = e.softmax(dim=2)  # Normalize on j, i.e. key
@@ -428,7 +428,7 @@ class Base(nn.Module):
             self.proms_emb(proms_list),  # [t' d_model]  t'=1167
             self.resps_emb(resps_list),  # [t'' d_model]  t''=819
             sep=self.sep,
-        )  # [t+t'+t''+2 d_model]
+        )  # [t+t'+t''+2 d_model] * b
 
         x, mask = list_to_tensor(x_list)
         x = self.sin_emb.add_pe(x)
@@ -436,7 +436,7 @@ class Base(nn.Module):
         for block in self.blocks:
             x = block(x, mask, quant_levels)
 
-        h = self.classifier(x) * mask  # [b max(t+t'+t''+2) n_resps_tokens]
+        h = self.classifier(x) * mask  # [max(t+t'+t''+2) n_resps_tokens] * b
 
         # Remove padding
         h_list = [hi[:li] for hi, li in zip(h, map(len, x_list))]
@@ -484,14 +484,14 @@ class Base(nn.Module):
                     torch.cat(y_list),
                     ignore_index=self.ignore_index,
                 )
-            )
+            )  # TODO: h_list and y_list should remove text and prompts?
 
         if return_all_resp:
             logits = [hi[-li:] for hi, li in zip(h_list, map(len, resps_list))]
             ret = [
                 Categorical(logits=hi / sampling_temperature).sample() for hi in logits
             ]
-        else:
+        else:  # return last element of h_list
             logits = torch.stack([hi[-1] for hi in h_list])
             ret = Categorical(logits=logits / sampling_temperature).sample()
 
