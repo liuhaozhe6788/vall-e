@@ -169,6 +169,7 @@ def train(
         if use_tb:
             with train_summary_writer.as_default():
                 tf.summary.scalar('train_loss', stats["model.loss"], step=batch_i)
+                tf.summary.scalar('learning_rate', stats["model.lr"], step=batch_i)
 
         command = _non_blocking_input()
 

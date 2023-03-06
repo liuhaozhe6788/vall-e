@@ -46,7 +46,7 @@
             "console": "integratedTerminal",
             "justMyCode": true,
             "args": [
-                "yaml=config/test/nar.yml"
+                "yaml=config/LibriTTS/ar.yml"
             ]
         }
     ]

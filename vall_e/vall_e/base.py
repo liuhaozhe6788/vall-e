@@ -440,32 +440,34 @@ class Base(nn.Module):
 
         # Remove padding
         h_list = [hi[:li] for hi, li in zip(h, map(len, x_list))]
+        # Remove text and prompts
+        h_list = [hi[-li:] for hi, li in zip(h_list, map(len, resps_list))]
 
         if targ_list is not None:
             if any([l == 0 for l in map(len, targ_list)]):
                 raise ValueError("Cannot compute loss given empty targ_list.")
 
-            device = h.device
+            # device = h.device
 
-            ignore_sep = torch.tensor(self.ignore_index, device=device)
+            # ignore_sep = torch.tensor(self.ignore_index, device=device)
 
-            # Ignore prom in the target
-            prom_list = [
-                torch.full_like(t[..., 0], self.ignore_index) for t in proms_list
-            ]
+            # # Ignore prom in the target
+            # prom_list = [
+            #     torch.full_like(t[..., 0], self.ignore_index) for t in proms_list
+            # ]
 
-            text_prom_list = self._samplewise_merge_tensors(
-                text_list, prom_list, sep=ignore_sep
-            )
+            # text_prom_list = self._samplewise_merge_tensors(
+            #     text_list, prom_list, sep=ignore_sep
+            # )
 
-            # Make every token earlier as it is future that is unknown
-            # If we don't want compute loss, set all to ignored
-            for i in range(len(text_prom_list)):
-                if self.resp_loss_only:
-                    text_prom_list[i][:] = self.ignore_index
-                else:
-                    text_prom_list[i] = text_prom_list[i].roll(-1, dims=0)  # cyclic shift ahead one timestep
-                    text_prom_list[i][-1] = self.ignore_index  # ignore the last step
+            # # Make every token earlier as it is future that is unknown
+            # # If we don't want compute loss, set all to ignored
+            # for i in range(len(text_prom_list)):
+            #     if self.resp_loss_only:
+            #         text_prom_list[i][:] = self.ignore_index
+            #     else:
+            #         text_prom_list[i] = text_prom_list[i].roll(-1, dims=0)  # cyclic shift ahead one timestep
+            #         text_prom_list[i][-1] = self.ignore_index  # ignore the last step
 
             if shift_targ_list:
                 # Also make target earlier if in autoregressive mode
@@ -474,14 +476,14 @@ class Base(nn.Module):
                     targ_list[i] = targ_list[i].roll(-1, dims=0)
                     targ_list[i][-1] = self.stop_token
 
-            y_list = self._samplewise_merge_tensors(
-                text_prom_list, targ_list, sep=ignore_sep
-            )
+            # y_list = self._samplewise_merge_tensors(
+            #     text_prom_list, targ_list, sep=ignore_sep
+            # )
 
             self.loss = dict(
                 nll=F.cross_entropy(
                     torch.cat(h_list),
-                    torch.cat(y_list),
+                    torch.cat(targ_list),
                     ignore_index=self.ignore_index,
                 )
             )  # TODO: h_list and y_list should remove text and prompts?
