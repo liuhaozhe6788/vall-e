@@ -46,7 +46,7 @@ class AR(Base):
         max_steps: int = 1000,
         sampling_temperature: float = 1.0,
     ):
-        if self.training:
+        if targ_list is not None:
 
             return super().forward(
                 text_list,
@@ -91,6 +91,7 @@ class AR(Base):
                 resp_list[i] = torch.cat([resp_list[i], ri[None]])
             if stopped.all().item():
                 break
+            torch.cuda.empty_cache()
         pruned = [self._prune(r) for r in resp_list]
         return pruned
 

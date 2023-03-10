@@ -133,6 +133,8 @@ class Engines(dict[str, Engine]):
                 maybe_loss_and_engine_stats = feeder(
                     engines=self, batch=batch, name=name
                 )
+                torch.cuda.empty_cache()
+
 
                 if maybe_loss_and_engine_stats is None:
                     # Here we allow skip optimizers. It's useful when, for example,
@@ -140,11 +142,12 @@ class Engines(dict[str, Engine]):
                     continue
 
                 loss, engine_stats = maybe_loss_and_engine_stats
-
                 engine.backward(loss)
+                torch.cuda.empty_cache()
                 # For monitoring purpose
-                grad_norm = engine.compute_grad_norm()
+                # grad_norm = engine.compute_grad_norm()
                 engine.step()
+                torch.cuda.empty_cache()
 
                 torch.cuda.synchronize()
                 elapsed_time = time.time() - start_time
@@ -156,7 +159,7 @@ class Engines(dict[str, Engine]):
                             name: dict(
                                 loss=loss.item(),
                                 lr=engine.get_lr()[0],
-                                grad_norm=grad_norm.item(),
+                                # grad_norm=grad_norm.item(),
                                 elapsed_time=elapsed_time,
                                 engine_step=engine.global_step,
                                 **engine_stats,
@@ -181,5 +184,6 @@ class Engines(dict[str, Engine]):
         stats["elapsed_time"] = total_elapsed_time
         stats["wall_time"] = time.time()
         stats["global_step"] = self.global_step
+        torch.cuda.empty_cache()
 
         return stats

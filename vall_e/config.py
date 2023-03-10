@@ -17,7 +17,7 @@ class Config(ConfigBase):
         return 24_000
 
     p_additional_prompt: float = 0.8
-    max_prompts: int = 3
+    max_prompts: int = 1
 
     max_num_val: int = 20
     max_val_ar_steps: int = 300
@@ -57,6 +57,8 @@ class Config(ConfigBase):
     def fp16_cfg(self):
         return {
             "enabled": self.use_fp16,
+            "min_loss_scale": 1,
+            "opt_level": "O2"
         }
 
     @property
@@ -78,8 +80,35 @@ class Config(ConfigBase):
                     "warmup_type": "linear",
                 },
             },
+            "zero_optimization": {
+                "stage": 0,
+                "contiguous_gradients": True,
+                "overlap_comm": True,
+                "reduce_bucket_size": 90000000,
+                "sub_group_size": 1e9,
+                "offload_optimizer": {
+                    "pin_memory": True, 
+                    "buffer_count": 8, 
+                    "fast_init": False 
+                }
+            },
+            "gradient_clipping": 1.0,
+            "fp16": {
+                    "enabled": True,
+                    "loss_scale_window": 1000,
+                    "hysteresis": 2,
+                    "min_loss_scale": 1
+            },
+            "wall_clock_breakdown": True,
+            "zero_allow_untested_optimizer": False,
+            "aio": {
+                    "block_size": 262144, 
+                    "queue_depth": 32, 
+                    "thread_count": 1, 
+                    "single_submit": False, 
+                    "overlap_events": True 
+            },
             "gradient_clipping": self.gradient_clipping,
-            "fp16": self.fp16_cfg,
         }
 
     @property

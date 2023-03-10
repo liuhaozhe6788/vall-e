@@ -4,6 +4,7 @@ from collections import defaultdict
 
 import torch
 from tqdm import tqdm
+import numpy as np
 
 from .config import cfg
 from .data import create_train_val_dataloader
@@ -16,6 +17,9 @@ _logger = logging.getLogger(__name__)
 
 def load_engines():
     model = get_model(cfg.model)
+    model_parameters = filter(lambda p: p.requires_grad, model.parameters())
+    params = sum([np.prod(p.size()) for p in model_parameters])
+    _logger.info(f"Number of parameters of AR model: {params // 1e6}M.")
 
     engines = dict(
         model=trainer.Engine(
@@ -87,7 +91,8 @@ def main():
             batch_stats = {k: v.item() for k, v in losses.items()}
             for k, v in batch_stats.items():
                 stats[k].append(v)
-            
+            torch.cuda.empty_cache()
+
         ### generate audio output of validation set
         def generate():
             batch = next(iter(dl))   
@@ -120,6 +125,7 @@ def main():
                 if len(hyp) > 0:
                     qnt.decode_to_file(hyp, hyp_path)
         generate()
+        torch.cuda.empty_cache()
 
         qnt.unload_model()
 

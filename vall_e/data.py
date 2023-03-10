@@ -188,7 +188,7 @@ class VALLEDatset(Dataset):
         self.paths = [*_interleaved_reorder(self.paths, fn)]
 
     def __len__(self):
-        return min(len(self.paths), self._head or len(self.paths))
+        return min(10*len(self.paths), self._head or 10*len(self.paths))
 
 
 def collate_fn(samples: list[dict]):

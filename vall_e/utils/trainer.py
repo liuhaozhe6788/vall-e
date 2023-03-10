@@ -131,7 +131,6 @@ def train(
         import tensorflow as tf
         import datetime
         # Hide GPU from visible devices
-        tf.config.set_visible_devices([], 'GPU')
         log_dir = f"{cfg.log_root}/{cfg.relpath}/tensorboard/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
         train_summary_writer = tf.summary.create_file_writer(log_dir)
 
@@ -168,8 +167,8 @@ def train(
         logger(data=stats)
         if use_tb:
             with train_summary_writer.as_default():
-                tf.summary.scalar('train_loss', stats["model.loss"], step=batch_i)
-                tf.summary.scalar('learning_rate', stats["model.lr"], step=batch_i)
+                tf.summary.scalar('train_loss', stats["model.loss"], step=engines.global_step)
+                tf.summary.scalar('learning_rate', stats["model.lr"], step=engines.global_step)
 
         command = _non_blocking_input()
 
@@ -219,7 +218,7 @@ def train(
                 engines.eval()
                 eval_stats = eval_fn(engines=engines) 
                 with train_summary_writer.as_default():
-                    tf.summary.scalar('val_loss', eval_stats["loss.nll"], step=batch_i)
+                    tf.summary.scalar('val_loss', eval_stats["loss.nll"], step=engines.global_step)
                 engines.train()
 
             if command in ["quit"]:

@@ -438,6 +438,9 @@ class Base(nn.Module):
 
         h = self.classifier(x) * mask  # [max(t+t'+t''+2) n_resps_tokens] * b
 
+        if torch.isnan(h).any().item():
+            print("nan")
+
         # Remove padding
         h_list = [hi[:li] for hi, li in zip(h, map(len, x_list))]
         # Remove text and prompts
@@ -495,6 +498,8 @@ class Base(nn.Module):
             ]
         else:  # return last element of h_list
             logits = torch.stack([hi[-1] for hi in h_list])
+            if torch.isnan(logits).any().item():
+                print("nan")
             ret = Categorical(logits=logits / sampling_temperature).sample()
 
         return ret

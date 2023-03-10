@@ -3,7 +3,7 @@ tqdm==4.64.1
 soundfile==0.12.1
 encodec==0.1.1
 coloredlogs==15.0.1
-deepspeed==15.0.1
+deepspeed
 diskcache==5.4.0
 einops==0.6.0
 humanize==4.6.0
@@ -14,6 +14,6 @@ openTSNE==0.7.1
 pandas==1.5.3
 librosa==0.10.0
 tensorboard==2.11.2
-tensorflow==2.11.0
-https://download.pytorch.org/whl/cu111/torch-1.10.2%2Bcu111-cp39-cp39-linux_x86_64.whl
-https://download.pytorch.org/whl/cu111/torchaudio-0.10.2%2Bcu111-cp39-cp39-linux_x86_64.whl
+tensorflow-cpu==2.11.0
+# https://download.pytorch.org/whl/cu111/torch-1.10.2%2Bcu111-cp39-cp39-linux_x86_64.whl
+# https://download.pytorch.org/whl/cu111/torchaudio-0.10.2%2Bcu111-cp39-cp39-linux_x86_64.whl
